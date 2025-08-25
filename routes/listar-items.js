@@ -57,40 +57,90 @@ router.get("/profissionais", auth, async (req, res) => {
   }
 });
 
-router.get("/pacientes", auth, async (req, res) => {
+router.get("/pacientes", async (req, res) => {
   try {
-    const pacientes = await prisma.paciente.findMany({
-      include: {
-        medicoResponsavel: {
-          select: {
-            id: true,
-            name: true,
-          },
+    const userId = req.user.id; // ID do usuário logado
+    const userType = req.user.tipo; // 'medico', 'secretaria', 'admin', etc.
+
+    let pacientes;
+
+    if (userType === "medico") {
+      // Médico só vê seus próprios pacientes
+      pacientes = await prisma.paciente.findMany({
+        where: { medicoResponsavelId: userId },
+        include: {
+          medicoResponsavel: { select: { id: true, name: true } },
         },
+      });
+    } else if (userType === "admin" || userType === "secretario") {
+      // Admin e secretaria veem todos os pacientes
+      pacientes = await prisma.paciente.findMany({
+        include: {
+          medicoResponsavel: { select: { id: true, name: true } },
+        },
+      });
+    } else {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    res.json({ pacientes });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao listar pacientes" });
+  }
+});
+
+router.get("/profissionais/:id/pacientes", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userType = req.user.tipo;
+
+    // Médico só pode consultar a própria lista
+    if (userType === "medico" && req.user.id !== parseInt(id)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    const pacientes = await prisma.paciente.findMany({
+      where: { medicoResponsavelId: parseInt(id) },
+      include: {
+        medicoResponsavel: { select: { id: true, name: true } },
       },
     });
 
-    res.status(200).json({ pacientes });
+    res.json({ pacientes });
   } catch (error) {
-    console.error("Erro ao listar paciente:", error);
-    return res.status(500).json({ message: "Falha no servidor" });
+    res.status(500).json({ message: "Erro ao buscar pacientes do médico" });
   }
 });
 
 router.get("/agendamento", async (req, res) => {
   try {
-    const agendados = await prisma.agendamento.findMany({
-      include: {
-        paciente: {
-          select: { id: true, nome: true },
-        },
-        medicoResponsavel: {
-          select: { id: true, name: true },
-        },
-      },
-    });
+    const userId = req.user.id; // ID do usuário logado
+    const userType = req.user.tipo; // 'medico', 'secretaria', 'admin', etc.
 
-    res.status(200).json({ agendados });
+    let agendamentos;
+
+    if (userType === "medico") {
+      // Médico só vê seus agendamentos
+      agendamentos = await prisma.agendamento.findMany({
+        where: { medicoResponsavelId: userId },
+        include: {
+          paciente: { select: { id: true, nome: true } },
+          medicoResponsavel: { select: { id: true, name: true } },
+        },
+      });
+    } else if (userType === "admin" || userType === "secretario") {
+      // Admin e secretaria veem todos os agendamentos
+      agendamentos = await prisma.agendamento.findMany({
+        include: {
+          paciente: { select: { id: true, nome: true } },
+          medicoResponsavel: { select: { id: true, name: true } },
+        },
+      });
+    } else {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    res.status(200).json({ agendamentos });
   } catch (error) {
     console.error("Erro ao listar agendamentos:", error);
     return res.status(500).json({ message: "Falha no servidor" });
