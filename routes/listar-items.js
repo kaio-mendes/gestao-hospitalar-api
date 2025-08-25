@@ -59,13 +59,42 @@ router.get("/profissionais", auth, async (req, res) => {
 
 router.get("/pacientes", auth, async (req, res) => {
   try {
-    const pacientes = await prisma.paciente.findMany();
+    const pacientes = await prisma.paciente.findMany({
+      include: {
+        medicoResponsavel: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
     res.status(200).json({ pacientes });
   } catch (error) {
     console.error("Erro ao listar paciente:", error);
     return res.status(500).json({ message: "Falha no servidor" });
   }
-  return res.status(404).json({ message: "Usuario nao eh permitido" });
 });
+
+router.get("/agendamento", async (req, res) => {
+  try {
+    const agendados = await prisma.agendamento.findMany({
+      include: {
+        paciente: {
+          select: { id: true, nome: true },
+        },
+        medicoResponsavel: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    res.status(200).json({ agendados });
+  } catch (error) {
+    console.error("Erro ao listar agendamentos:", error);
+    return res.status(500).json({ message: "Falha no servidor" });
+  }
+});
+
 export default router;

@@ -70,6 +70,7 @@ router.post("/pacientes", auth, async (req, res) => {
       nome_emergencia,
       telefone_emergencia,
       endereco_emergencia,
+      medicoResponsavelId,
     } = req.body;
 
     if (!nome || !cpf || !data_nascimento) {
@@ -93,13 +94,31 @@ router.post("/pacientes", auth, async (req, res) => {
         nome_emergencia,
         telefone_emergencia,
         endereco_emergencia,
-        medicoResponsavelId: null,
+        medicoResponsavelId,
       },
     });
 
     return res.status(201).json(paciente);
   } catch (error) {
     console.error("Erro ao criar paciente:", error);
+    return res.status(500).json({ message: "Erro no servidor" });
+  }
+});
+
+router.post("/agendar", auth, async (req, res) => {
+  try {
+    const dadosAgenda = req.body;
+    const consulta = await prisma.agendamento.create({
+      data: {
+        pacienteId: dadosAgenda.pacienteId,
+        medicoResponsavelId: dadosAgenda.medicoResponsavelId,
+        observacao: dadosAgenda.observacao,
+        dataConsulta: dadosAgenda.dataConsulta,
+      },
+    });
+    return res.status(201).json(dadosAgenda);
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Erro no servidor" });
   }
 });
