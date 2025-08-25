@@ -29,19 +29,43 @@ router.get("/listar-usuarios", auth, async (req, res) => {
 });
 
 router.get("/listar-departamentos", auth, async (req, res) => {
-  const isAdmin = req.user?.tipo;
-  if (isAdmin == "admin") {
-    try {
-      const department = await prisma.department.findMany();
+  try {
+    const department = await prisma.department.findMany();
 
-      res.status(200).json({ department });
-    } catch (error) {
-      console.error("Erro ao listar usuários:", error);
-      return res.status(500).json({ message: "Falha no servidor" });
-    }
-  } else {
-    return res.status(404).json({ message: "Usuario nao eh administrador" });
+    res.status(200).json({ department });
+  } catch (error) {
+    console.error("Erro ao listar usuários:", error);
+    return res.status(500).json({ message: "Falha no servidor" });
   }
 });
 
+router.get("/profissionais", auth, async (req, res) => {
+  const allowUser = req.user?.tipo;
+  if (allowUser == "admin" || allowUser == "secretario") {
+    try {
+      const professionals = await prisma.user.findMany({
+        where: { tipo: "medico" },
+      });
+
+      res.status(200).json({ professionals });
+    } catch (error) {
+      console.error("Erro ao listar profissionais:", error);
+      return res.status(500).json({ message: "Falha no servidor" });
+    }
+  } else {
+    return res.status(404).json({ message: "Usuario nao eh permitido" });
+  }
+});
+
+router.get("/pacientes", auth, async (req, res) => {
+  try {
+    const pacientes = await prisma.paciente.findMany();
+
+    res.status(200).json({ pacientes });
+  } catch (error) {
+    console.error("Erro ao listar paciente:", error);
+    return res.status(500).json({ message: "Falha no servidor" });
+  }
+  return res.status(404).json({ message: "Usuario nao eh permitido" });
+});
 export default router;

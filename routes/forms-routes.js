@@ -14,7 +14,6 @@ router.post("/novo-setor", auth, async (req, res) => {
       },
     });
     res.status(201).json(department);
-    console.log("ok");
   } catch (error) {
     console.log(error);
   }
@@ -53,5 +52,55 @@ router.post("/novo-quarto", auth, async (req, res) => {
   }
 });
 
-router.post("/setores", async (req, res) => {});
+router.post("/pacientes", auth, async (req, res) => {
+  try {
+    const {
+      nome,
+      cpf,
+      data_nascimento,
+      idade,
+      genero,
+      estado_civil,
+      telefone,
+      endereco,
+      bairro,
+      cidade,
+      estado,
+      cep,
+      nome_emergencia,
+      telefone_emergencia,
+      endereco_emergencia,
+    } = req.body;
+
+    if (!nome || !cpf || !data_nascimento) {
+      return res.status(400).json({ message: "Dados obrigatórios faltando." });
+    }
+
+    const paciente = await prisma.paciente.create({
+      data: {
+        nome,
+        cpf,
+        data_nascimento: new Date(data_nascimento),
+        idade,
+        genero,
+        estado_civil,
+        telefone,
+        endereco,
+        bairro,
+        cidade,
+        estado,
+        cep,
+        nome_emergencia,
+        telefone_emergencia,
+        endereco_emergencia,
+        medicoResponsavelId: null,
+      },
+    });
+
+    return res.status(201).json(paciente);
+  } catch (error) {
+    console.error("Erro ao criar paciente:", error);
+    return res.status(500).json({ message: "Erro no servidor" });
+  }
+});
 export default router;

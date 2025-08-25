@@ -28,7 +28,7 @@ router.post("/cadastro", async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         password: hashPassword,
-        setor: newUser.setor,
+        setor: newUser.setor ?? "",
         tipo: newUser.tipo ?? "", //usuario sem atributo
       },
     });
