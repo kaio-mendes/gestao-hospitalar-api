@@ -7,24 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model agendamento {
-  id                  Int       @id @default(autoincrement())
-  pacienteId          Int
-  paciente            paciente  @relation(fields: [pacienteId], references: [id], name: "PacienteAgendamentos", map: "fk_agendamento_paciente")
-  medicoResponsavelId Int?
-  medicoResponsavel   user?     @relation(fields: [medicoResponsavelId], references: [id], name: "MedicoAgendamentos", map: "fk_agendamento_medico")
-  observacao          String?   @db.VarChar(255)
-  dataConsulta        DateTime  @db.DateTime(0)
-  createdAt           DateTime? @default(now()) @db.DateTime(0)
-
-  @@index([pacienteId], map: "idx_agendamento_pacienteId")
-  @@index([medicoResponsavelId], map: "idx_agendamento_medicoResponsavelId")
-}
-
 model paciente {
-  id                  Int          @id @default(autoincrement())
+  id                  Int      @id @default(autoincrement())
   nome                String
-  cpf                 String       @unique(map: "Paciente_cpf_key")
+  cpf                 String   @unique(map: "Paciente_cpf_key")
   data_nascimento     DateTime
   idade               Int
   genero              String
@@ -39,25 +25,24 @@ model paciente {
   telefone_emergencia String
   endereco_emergencia String
   medicoResponsavelId Int?
-  medicoResponsavel   user?        @relation(fields: [medicoResponsavelId], references: [id], name: "PacienteMedico", map: "fk_paciente_medico")
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  agendamentos agendamento[]
+  medicoResponsavel   user?    @relation("MedicoResponsavel", fields: [medicoResponsavelId], references: [id])
 
-  agendamentos        agendamento[] @relation("PacienteAgendamentos")
-  
-  @@index([medicoResponsavelId], map: "idx_paciente_medicoResponsavelId")
+  @@index([medicoResponsavelId], map: "Paciente_medicoResponsavelId_fkey")
 }
 
 model user {
-  id         Int        @id @default(autoincrement())
-  name       String
-  email      String     @unique(map: "User_email_key")
-  password   String
-  setor      String?
-  tipo       String     @db.VarChar(30)
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique(map: "User_email_key")
+  password String
+  setor    String?
+  tipo     String  @db.VarChar(30)
+  pacientes       paciente[] @relation("MedicoResponsavel")
+  agendamentos    agendamento[]
 
-  pacientes  paciente[] @relation("PacienteMedico")
-  agendamentos agendamento[] @relation("MedicoAgendamentos")
 }
 
 model department {
@@ -81,4 +66,21 @@ model professional {
   telephone  String
   password   String
   department String
+}
+
+model agendamento {
+  id                  Int       @id @default(autoincrement())
+  pacienteId          Int
+  medicoResponsavelId Int?
+  observacao          String?   @db.VarChar(255)
+  dataConsulta        DateTime  @db.DateTime(0)
+  horaConsulta        DateTime? @db.Time(0)
+  createdAt           DateTime? @default(now()) @db.DateTime(0)
+
+  // Relações
+  paciente           paciente @relation(fields: [pacienteId], references: [id])
+  medicoResponsavel  user? @relation(fields: [medicoResponsavelId], references: [id])
+
+  @@index([pacienteId], map: "idx_agendamento_pacienteId")
+  @@index([medicoResponsavelId], map: "idx_agendamento_medicoResponsavelId")
 }

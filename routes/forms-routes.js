@@ -77,6 +77,19 @@ router.post("/pacientes", auth, async (req, res) => {
       return res.status(400).json({ message: "Dados obrigatórios faltando." });
     }
 
+    // Verifica se o médico existe
+    let medico = null;
+    if (medicoResponsavelId) {
+      medico = await prisma.user.findUnique({
+        where: { id: medicoResponsavelId },
+      });
+      if (!medico || medico.tipo !== "medico") {
+        return res
+          .status(400)
+          .json({ message: "Médico responsável não existe." });
+      }
+    }
+
     const paciente = await prisma.paciente.create({
       data: {
         nome,
@@ -94,13 +107,14 @@ router.post("/pacientes", auth, async (req, res) => {
         nome_emergencia,
         telefone_emergencia,
         endereco_emergencia,
-        medicoResponsavelId,
+        medicoResponsavelId: medico?.id || null,
       },
     });
 
     return res.status(201).json(paciente);
   } catch (error) {
     console.error("Erro ao criar paciente:", error);
+
     return res.status(500).json({ message: "Erro no servidor" });
   }
 });
@@ -114,6 +128,7 @@ router.post("/agendar", auth, async (req, res) => {
         medicoResponsavelId: dadosAgenda.medicoResponsavelId,
         observacao: dadosAgenda.observacao,
         dataConsulta: dadosAgenda.dataConsulta,
+        horaConsulta: dadosAgenda.horaConsulta,
       },
     });
     return res.status(201).json(dadosAgenda);

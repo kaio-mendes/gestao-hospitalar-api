@@ -45,6 +45,12 @@ router.get("/profissionais", auth, async (req, res) => {
     try {
       const professionals = await prisma.user.findMany({
         where: { tipo: "medico" },
+        select: {
+          id: true,
+          name: true,
+          setor: true,
+          tipo: true,
+        },
       });
 
       res.status(200).json({ professionals });
@@ -85,6 +91,7 @@ router.get("/pacientes", async (req, res) => {
 
     res.json({ pacientes });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Erro ao listar pacientes" });
   }
 });
