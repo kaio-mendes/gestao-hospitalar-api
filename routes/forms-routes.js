@@ -137,4 +137,32 @@ router.post("/agendar", auth, async (req, res) => {
     return res.status(500).json({ message: "Erro no servidor" });
   }
 });
+
+router.post("/laudo", auth, async (req, res) => {
+  try {
+    const laudo = req.body;
+    const idAgenda = parseInt(req.body.agendamentoId);
+
+    console.log("agendamento" + idAgenda);
+    const informaçõesLaudo = await prisma.prescricao.create({
+      data: {
+        pacienteId: laudo.pacienteId,
+        medicoResponsavelId: laudo.medicoResponsavelId,
+        dataConsulta: laudo.dataConsulta,
+        horaConsulta: laudo.horaConsulta,
+        sintomas: laudo.sintomas,
+        observacao: laudo.observacao,
+        prescricao: laudo.prescricao,
+      },
+    });
+    await prisma.agendamento.update({
+      where: { id: idAgenda },
+      data: { finalizado: true },
+    });
+    return res.status(200).json({ message: "tudo certo" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Erro no servidor" });
+  }
+});
 export default router;

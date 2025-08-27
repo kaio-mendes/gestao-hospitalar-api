@@ -154,4 +154,22 @@ router.get("/agendamento", async (req, res) => {
   }
 });
 
+router.get("/laudo/:id", auth, async (req, res) => {
+  try {
+    const pacienteId = req.params.id;
+    const id = parseInt(pacienteId);
+    console.log(id);
+    const laudoPaciente = await prisma.prescricao.findMany({
+      where: { pacienteId: id },
+      include: {
+        paciente: { select: { id: true, nome: true } },
+        medicoResponsavel: { select: { id: true, name: true } },
+      },
+    });
+    res.json({ laudoPaciente });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 export default router;

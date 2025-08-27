@@ -27,10 +27,12 @@ model paciente {
   medicoResponsavelId Int?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-  agendamentos agendamento[]
-  medicoResponsavel   user?    @relation("MedicoResponsavel", fields: [medicoResponsavelId], references: [id])
 
-  @@index([medicoResponsavelId], map: "Paciente_medicoResponsavelId_fkey")
+  agendamentos   agendamento[]
+  prescricoes     prescricao[]
+  medicoResponsavel user? @relation("Paciente_MedicoResponsavel", fields: [medicoResponsavelId], references: [id])
+
+  @@index([medicoResponsavelId], map: "idx_paciente_medicoResponsavelId")
 }
 
 model user {
@@ -40,9 +42,10 @@ model user {
   password String
   setor    String?
   tipo     String  @db.VarChar(30)
-  pacientes       paciente[] @relation("MedicoResponsavel")
-  agendamentos    agendamento[]
 
+  pacientes       paciente[] @relation("Paciente_MedicoResponsavel")
+  agendamentos    agendamento[] @relation("Agendamento_MedicoResponsavel")
+  prescricoes     prescricao[] @relation("Prescricao_MedicoResponsavel")
 }
 
 model department {
@@ -76,11 +79,30 @@ model agendamento {
   dataConsulta        DateTime  @db.DateTime(0)
   horaConsulta        DateTime? @db.Time(0)
   createdAt           DateTime? @default(now()) @db.DateTime(0)
+  finalizado Boolean @default(false)
 
-  // Relações
+
   paciente           paciente @relation(fields: [pacienteId], references: [id])
-  medicoResponsavel  user? @relation(fields: [medicoResponsavelId], references: [id])
+  medicoResponsavel  user?    @relation("Agendamento_MedicoResponsavel", fields: [medicoResponsavelId], references: [id])
+
 
   @@index([pacienteId], map: "idx_agendamento_pacienteId")
   @@index([medicoResponsavelId], map: "idx_agendamento_medicoResponsavelId")
+}
+
+model prescricao {
+  id                  Int      @id @default(autoincrement())
+  pacienteId          Int
+  medicoResponsavelId Int
+  sintomas          String   @db.VarChar(400)
+  observacao          String   @db.VarChar(400)
+  prescricao          String   @db.VarChar(400)
+  dataConsulta        DateTime @db.DateTime(0)
+  horaConsulta        DateTime? @db.Time(0)
+
+  paciente           paciente @relation(fields: [pacienteId], references: [id])
+  medicoResponsavel  user     @relation("Prescricao_MedicoResponsavel", fields: [medicoResponsavelId], references: [id])
+
+  @@index([pacienteId], map: "idx_prescricao_pacienteId")
+  @@index([medicoResponsavelId], map: "idx_prescricao_medicoResponsavelId")
 }
