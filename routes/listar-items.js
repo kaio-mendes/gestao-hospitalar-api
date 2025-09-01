@@ -158,7 +158,6 @@ router.get("/laudo/:id", auth, async (req, res) => {
   try {
     const pacienteId = req.params.id;
     const id = parseInt(pacienteId);
-    console.log(id);
     const laudoPaciente = await prisma.prescricao.findMany({
       where: { pacienteId: id },
       include: {

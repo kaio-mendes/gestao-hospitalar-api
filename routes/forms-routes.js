@@ -143,7 +143,6 @@ router.post("/laudo", auth, async (req, res) => {
     const laudo = req.body;
     const idAgenda = parseInt(req.body.agendamentoId);
 
-    console.log("agendamento" + idAgenda);
     const informaçõesLaudo = await prisma.prescricao.create({
       data: {
         pacienteId: laudo.pacienteId,
