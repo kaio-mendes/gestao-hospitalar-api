@@ -3,6 +3,7 @@ import publicRoutes from "./routes/public.js";
 import privateRoutes from "./routes/private.js";
 import formsRoutes from "./routes/forms-routes.js";
 import listarItems from "./routes/listar-items.js";
+import DeleteItems from "./routes/delete-routes.js";
 import auth from "./middlewares/auth.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -21,6 +22,7 @@ app.use("/", publicRoutes);
 app.use("/", auth, privateRoutes);
 app.use("/", auth, formsRoutes);
 app.use("/", auth, listarItems);
+app.use("/", auth, DeleteItems);
 app.listen(3000, () => {
   console.log("Rodando 👌");
 });
