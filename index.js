@@ -26,8 +26,11 @@ app.use("/", auth, privateRoutes);
 app.use("/", auth, formsRoutes);
 app.use("/", auth, listarItems);
 app.use("/", auth, DeleteItems);
-app.listen(3000, () => {
-  console.log("Rodando 👌");
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Rodando na porta ${PORT}`);
 });
 
 app.get("/", (req, res) => {
