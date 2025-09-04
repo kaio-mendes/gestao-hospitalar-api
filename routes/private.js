@@ -17,8 +17,8 @@ router.get("/user-info", auth, async (req, res) => {
 router.post("/logout", auth, async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: "none",
   });
   res.send(200).json({ message: "tudo certo" });
 });
