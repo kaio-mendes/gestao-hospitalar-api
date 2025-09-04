@@ -15,6 +15,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://gestao-hospitalar.kaiomendes.com.br",
+      "https://gestao-hospitalar-api.kaiomendes.com.br",
+      "http://localhost:3000",
     ],
     credentials: true,
   })
