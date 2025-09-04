@@ -12,8 +12,11 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // URL do seu frontend. Verifique a porta do seu projeto!
-    credentials: true, // Isso permite que o navegador envie cookies
+    origin: [
+      "http://localhost:5173",
+      "https://gestao-hospitalar.kaiomendes.com.br",
+    ],
+    credentials: true,
   })
 );
 app.use(cookieParser());
